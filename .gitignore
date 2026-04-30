@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+app_cache.json
+conversation_history.json
+launch_failures.json
+*.env

@@ -1,0 +1,10 @@
+# Core Nexus — Python Dependencies
+# Install with: pip install -r requirements.txt
+
+anthropic>=0.40.0          # Claude API client
+SpeechRecognition>=3.10.0  # Voice recognition
+pyttsx3>=2.90              # Text-to-speech (offline, no API key needed)
+pyaudio>=0.2.14            # Microphone input (required by SpeechRecognition)
+psutil>=6.0.0              # Process management + CPU stats
+pycaw>=20240210            # Windows audio volume control
+comtypes>=1.4.0            # COM interface (required by pycaw on Windows)

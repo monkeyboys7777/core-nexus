@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CORE NEXUS</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
+  :root {
+    --bg:#080c10; --bg2:#0d1318; --bg3:#111820; --border:#1a2a3a;
+    --accent:#00c8ff; --accent2:#0066aa; --accent3:#003355;
+    --green:#00ff88; --amber:#ffaa00; --red:#ff3344;
+    --text:#c8e0f0; --text2:#6a90aa; --text3:#3a5566;
+    --mono:'Share Tech Mono',monospace; --sans:'Rajdhani',sans-serif;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:var(--bg); color:var(--text); font-family:var(--mono);
+    height:100vh; overflow:hidden;
+    display:grid;
+    grid-template-rows:52px 1fr 140px;
+    grid-template-columns:220px 1fr 200px;
+    grid-template-areas:"header header header" "sidebar log stats" "sidebar input stats";
+  }
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:100;
+    background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);
+  }
+  header {
+    grid-area:header; display:flex; align-items:center; justify-content:space-between;
+    padding:0 20px; border-bottom:1px solid var(--border); background:var(--bg2);
+  }
+  .logo { font-family:var(--sans); font-weight:700; font-size:18px; letter-spacing:4px; color:var(--accent); }
+  .logo span { color:var(--text2); font-weight:400; }
+  .hstatus { display:flex; gap:20px; align-items:center; font-size:11px; color:var(--text2); letter-spacing:1px; }
+  .dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--text3); margin-right:5px; transition:background 0.3s; }
+  .dot.on  { background:var(--green); box-shadow:0 0 6px var(--green); }
+  .dot.err { background:var(--red);   box-shadow:0 0 6px var(--red); }
+  .dot.warn{ background:var(--amber); box-shadow:0 0 6px var(--amber); }
+  .clock { font-family:var(--mono); font-size:12px; color:var(--accent); min-width:60px; text-align:right; }
+  aside {
+    grid-area:sidebar; border-right:1px solid var(--border); background:var(--bg2);
+    padding:16px 12px; overflow-y:auto; display:flex; flex-direction:column; gap:20px;
+  }
+  .slabel {
+    font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:2px;
+    color:var(--text3); text-transform:uppercase; padding-bottom:6px;
+    border-bottom:1px solid var(--border); margin-bottom:6px;
+  }
+  .abtn {
+    display:block; width:100%; background:transparent; border:1px solid var(--border);
+    color:var(--text); font-family:var(--mono); font-size:11px; padding:6px 10px;
+    text-align:left; cursor:pointer; transition:all 0.15s; border-radius:2px; margin-bottom:4px;
+  }
+  .abtn:hover { border-color:var(--accent2); background:var(--accent3); color:var(--accent); }
+  .abtn .ic { color:var(--accent2); margin-right:6px; font-size:10px; }
+  #log {
+    grid-area:log; padding:16px; overflow-y:auto;
+    display:flex; flex-direction:column; gap:6px; background:var(--bg);
+  }
+  .le { display:flex; gap:10px; font-size:12px; line-height:1.5; animation:fi 0.2s ease; }
+  @keyframes fi { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+  .lt { color:var(--text3); min-width:56px; font-size:10px; padding-top:2px; }
+  .lb {
+    font-family:var(--sans); font-size:9px; font-weight:700; letter-spacing:1px;
+    padding:2px 5px; border-radius:2px; height:fit-content; margin-top:2px; min-width:46px; text-align:center;
+  }
+  .bc { background:var(--accent3); color:var(--accent);  border:1px solid var(--accent2); }
+  .bn { background:#001a00;        color:var(--green);   border:1px solid #003300; }
+  .bs { background:#1a1000;        color:var(--amber);   border:1px solid #332200; }
+  .be { background:#1a0000;        color:var(--red);     border:1px solid #330000; }
+  .lx { flex:1; color:var(--text); word-break:break-word; }
+  .lx.m { color:var(--text2); }
+  #confirm-modal {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7);
+    z-index:50; align-items:center; justify-content:center;
+  }
+  #confirm-modal.show { display:flex; }
+  .cbox { background:var(--bg2); border:1px solid var(--amber); padding:24px 28px; min-width:320px; border-radius:4px; }
+  .cbox p { font-family:var(--sans); font-size:15px; color:var(--amber); margin-bottom:20px; }
+  .cbtns { display:flex; gap:10px; }
+  .byes { background:var(--green); color:#000; border:none; padding:8px 20px; cursor:pointer; font-family:var(--sans); font-weight:700; font-size:13px; border-radius:2px; }
+  .bno  { background:transparent; color:var(--red); border:1px solid var(--red); padding:8px 20px; cursor:pointer; font-family:var(--sans); font-weight:700; font-size:13px; border-radius:2px; }
+  #input-area {
+    grid-area:input; border-top:1px solid var(--border); background:var(--bg2);
+    padding:14px 16px; display:flex; flex-direction:column; gap:10px;
+  }
+  .irow { display:flex; gap:8px; align-items:center; }
+  .ps { color:var(--accent); font-size:14px; flex-shrink:0; }
+  #cmd-input {
+    flex:1; background:var(--bg3); border:1px solid var(--border); color:var(--text);
+    font-family:var(--mono); font-size:13px; padding:8px 12px; outline:none;
+    border-radius:2px; transition:border-color 0.2s;
+  }
+  #cmd-input:focus { border-color:var(--accent2); }
+  #cmd-input::placeholder { color:var(--text3); }
+  #mic-btn {
+    width:36px; height:36px; background:var(--bg3); border:1px solid var(--border);
+    color:var(--text2); cursor:pointer; border-radius:2px; font-size:16px;
+    display:flex; align-items:center; justify-content:center; transition:all 0.2s; flex-shrink:0;
+  }
+  #mic-btn:hover { border-color:var(--accent2); color:var(--accent); }
+  #mic-btn.active { background:#001a00; border-color:var(--green); color:var(--green); animation:pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,255,136,0.3)} 50%{box-shadow:0 0 0 6px rgba(0,255,136,0)} }
+  #send-btn {
+    background:var(--accent3); border:1px solid var(--accent2); color:var(--accent);
+    font-family:var(--sans); font-size:12px; font-weight:600; letter-spacing:1px;
+    padding:0 14px; height:36px; cursor:pointer; border-radius:2px; transition:all 0.15s; flex-shrink:0;
+  }
+  #send-btn:hover { background:var(--accent2); }
+  .hint { font-size:10px; color:var(--text3); letter-spacing:0.5px; }
+  .hint span { color:var(--text2); }
+  #stats {
+    grid-area:stats; border-left:1px solid var(--border); background:var(--bg2);
+    padding:14px 12px; display:flex; flex-direction:column; gap:14px; overflow-y:auto;
+  }
+  .scard { background:var(--bg3); border:1px solid var(--border); border-radius:2px; padding:10px 12px; }
+  .sc-label { font-family:var(--sans); font-size:9px; font-weight:600; letter-spacing:2px; color:var(--text3); text-transform:uppercase; margin-bottom:4px; }
+  .sc-val { font-family:var(--mono); font-size:20px; color:var(--accent); }
+  .sc-val.g { color:var(--green); }
+  .sc-val.a { color:var(--amber); }
+  .sc-val.r { color:var(--red); }
+  .sc-sub { font-size:11px; color:var(--text2); margin-top:2px; }
+  .bar-t { height:3px; background:var(--border); border-radius:2px; margin-top:6px; overflow:hidden; }
+  .bar-f { height:100%; background:var(--accent); border-radius:2px; transition:width 0.5s; }
+  .bar-f.g { background:var(--green); }
+  .bar-f.a { background:var(--amber); }
+  .bar-f.r { background:var(--red); }
+  ::-webkit-scrollbar { width:4px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">CORE <span>///</span> NEXUS</div>
+  <div class="hstatus">
+    <div><span class="dot" id="dot-ollama"></span>OLLAMA</div>
+    <div><span class="dot" id="dot-mic"></span>MIC</div>
+    <div id="status-ai"><span class="dot warn" id="dot-ai"></span>STANDBY</div>
+  </div>
+  <div class="clock" id="clock">00:00:00</div>
+</header>
+
+<aside>
+  <div>
+    <div class="slabel">Apps</div>
+    <div id="app-buttons"></div>
+  </div>
+  <div>
+    <div class="slabel">Macros</div>
+    <div id="macro-buttons"></div>
+  </div>
+</aside>
+
+<div id="log">
+  <div class="le">
+    <span class="lt"></span>
+    <span class="lb bs">SYS</span>
+    <span class="lx m">Initializing Core Nexus...</span>
+  </div>
+</div>
+
+<div id="confirm-modal">
+  <div class="cbox">
+    <p id="confirm-text">Confirm action?</p>
+    <div class="cbtns">
+      <button class="byes" onclick="sendConfirm(true)">CONFIRM</button>
+      <button class="bno"  onclick="sendConfirm(false)">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<div id="input-area">
+  <div class="irow">
+    <span class="ps">&gt;_</span>
+    <input id="cmd-input" type="text" placeholder="Enter command or speak..." autocomplete="off" spellcheck="false">
+    <button id="mic-btn" title="Toggle mic" onclick="toggleMic()">&#127908;</button>
+    <button id="send-btn" onclick="sendCommand()">EXEC</button>
+  </div>
+  <div class="hint">Say <span>"Nexus, [command]"</span> &nbsp;|&nbsp; Type and press <span>Enter</span> &nbsp;|&nbsp; Click <span>EXEC</span></div>
+</div>
+
+<div id="stats">
+  <div class="scard">
+    <div class="sc-label">CPU Load</div>
+    <div class="sc-val g" id="cpu-val">--</div>
+    <div class="bar-t"><div class="bar-f g" id="cpu-bar" style="width:0%"></div></div>
+  </div>
+  <div class="scard">
+    <div class="sc-label">Commands</div>
+    <div class="sc-val" id="cmd-count">0</div>
+    <div class="sc-sub" id="last-cmd">--</div>
+  </div>
+  <div class="scard">
+    <div class="sc-label">AI Engine</div>
+    <div class="sc-val" style="font-size:13px;line-height:1.4;color:var(--text2)">gemma3:4b<br><span style="color:var(--accent);font-size:11px">local</span></div>
+  </div>
+  <div class="scard">
+    <div class="sc-label">Session</div>
+    <div class="sc-val" id="session-time">00:00</div>
+  </div>
+</div>
+
+<script>
+var socket = io();
+var pendingPlan = null;
+var cmdCount = 0;
+var sessionStart = Date.now();
+var recognition = null;
+var micActive = false;
+var micRestarting = false;
+var WAKE = "nexus";
+
+// Clock
+setInterval(function() {
+  var now = new Date();
+  document.getElementById("clock").textContent = now.toTimeString().slice(0,8);
+  var elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+  var m = String(Math.floor(elapsed/60)).padStart(2,"0");
+  var s = String(elapsed % 60).padStart(2,"0");
+  document.getElementById("session-time").textContent = m + ":" + s;
+}, 1000);
+
+// Log
+function addLog(text, type) {
+  type = type || "nexus";
+  var log = document.getElementById("log");
+  var entry = document.createElement("div");
+  entry.className = "le";
+  var now = new Date().toTimeString().slice(0,8);
+  var cls = {cmd:"bc",nexus:"bn",sys:"bs",err:"be"};
+  var lbl = {cmd:"INPUT",nexus:"NEXUS",sys:"SYS",err:"ERROR"};
+  entry.innerHTML = '<span class="lt">' + now + '</span><span class="lb ' + (cls[type]||"bs") + '">' + (lbl[type]||type) + '</span><span class="lx">' + text + '</span>';
+  log.appendChild(entry);
+  log.scrollTop = log.scrollHeight;
+}
+
+function setStatus(label, dotClass) {
+  document.getElementById("status-ai").innerHTML = '<span class="dot ' + dotClass + '" id="dot-ai"></span>' + label;
+}
+
+// Socket
+socket.on("connect", function() {
+  setStatus("ONLINE", "on");
+  addLog("Connection established.", "sys");
+});
+
+socket.on("disconnect", function() {
+  setStatus("OFFLINE", "err");
+  addLog("Connection lost.", "err");
+});
+
+socket.on("nexus_speak", function(d) {
+  addLog(d.text, "nexus");
+  if (window.speechSynthesis) {
+    var utt = new SpeechSynthesisUtterance(d.text);
+    utt.rate = 1.1; utt.pitch = 0.9;
+    window.speechSynthesis.speak(utt);
+  }
+});
+
+socket.on("command_received", function(d) {
+  cmdCount++;
+  document.getElementById("cmd-count").textContent = cmdCount;
+  var short = d.command.slice(0,22) + (d.command.length > 22 ? "..." : "");
+  document.getElementById("last-cmd").textContent = short;
+  addLog(d.command, "cmd");
+  setStatus("PROCESSING", "warn");
+});
+
+socket.on("confirm_required", function(d) {
+  pendingPlan = d.plan;
+  document.getElementById("confirm-text").textContent = d.prompt;
+  document.getElementById("confirm-modal").classList.add("show");
+  addLog("Confirmation required: " + d.prompt, "sys");
+});
+
+socket.on("actions_complete", function() {
+  setStatus("ONLINE", "on");
+});
+
+// Status poll
+function pollStatus() {
+  fetch("/api/status").then(function(r) { return r.json(); }).then(function(d) {
+    document.getElementById("dot-ollama").className = "dot " + (d.ollama ? "on" : "err");
+    var cpu = d.cpu || 0;
+    document.getElementById("cpu-val").textContent = cpu.toFixed(0) + "%";
+    document.getElementById("cpu-bar").style.width = cpu + "%";
+    var cv = document.getElementById("cpu-val");
+    var cb = document.getElementById("cpu-bar");
+    if (cpu > 80) { cv.className="sc-val r"; cb.className="bar-f r"; }
+    else if (cpu > 50) { cv.className="sc-val a"; cb.className="bar-f a"; }
+    else { cv.className="sc-val g"; cb.className="bar-f g"; }
+
+    var appDiv = document.getElementById("app-buttons");
+    if (!appDiv.children.length && d.apps && d.apps.length) {
+      d.apps.forEach(function(app) {
+        var btn = document.createElement("button");
+        btn.className = "abtn";
+        btn.innerHTML = '<span class="ic">&#9658;</span>' + app;
+        btn.onclick = function() { sendCommandText("launch " + app); };
+        appDiv.appendChild(btn);
+      });
+    }
+    var macroDiv = document.getElementById("macro-buttons");
+    if (!macroDiv.children.length && d.macros && d.macros.length) {
+      d.macros.forEach(function(macro) {
+        var btn = document.createElement("button");
+        btn.className = "abtn";
+        btn.innerHTML = '<span class="ic">&#9654;</span>' + macro.replace(/_/g," ");
+        btn.onclick = function() { sendCommandText(macro.replace(/_/g," ") + " mode"); };
+        macroDiv.appendChild(btn);
+      });
+    }
+  }).catch(function(){});
+}
+pollStatus();
+setInterval(pollStatus, 5000);
+
+// Send
+function sendCommandText(text) {
+  document.getElementById("cmd-input").value = text;
+  sendCommand();
+}
+
+function sendCommand() {
+  var input = document.getElementById("cmd-input");
+  var cmd = input.value.trim();
+  if (!cmd) return;
+  input.value = "";
+  fetch("/api/command", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({command: cmd})
+  }).catch(function(e) { addLog("Request failed: " + e, "err"); });
+}
+
+function sendConfirm(confirmed) {
+  document.getElementById("confirm-modal").classList.remove("show");
+  fetch("/api/confirm", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({confirmed: confirmed, plan: pendingPlan})
+  });
+  pendingPlan = null;
+}
+
+document.getElementById("cmd-input").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") sendCommand();
+});
+
+// Mic
+function toggleMic() {
+  if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
+    addLog("Speech recognition not supported. Use Chrome.", "err");
+    return;
+  }
+  if (micActive) {
+    if (recognition) {
+      recognition._stopped = true;
+      recognition.stop();
+    }
+    return;
+  }
+  startMic(true);
+}
+
+function startMic(showLog) {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.continuous = true;
+  recognition.interimResults = false;
+  recognition.lang = "en-US";
+  recognition._stopped = false;
+
+  recognition.onstart = function() {
+    micActive = true;
+    document.getElementById("mic-btn").classList.add("active");
+    document.getElementById("dot-mic").className = "dot on";
+    if (showLog) addLog("Microphone active. Listening for Nexus...", "sys");
+  };
+
+  recognition.onresult = function(e) {
+    var transcript = "";
+    for (var i = 0; i < e.results.length; i++) {
+      transcript += e.results[i][0].transcript;
+    }
+    transcript = transcript.toLowerCase().trim();
+    if (transcript.indexOf(WAKE) !== -1) {
+      var parts = transcript.split(WAKE);
+      var cmd = parts[parts.length - 1].trim().replace(/^[,\s]+/, "");
+      if (cmd) {
+        addLog("[voice] " + transcript, "sys");
+        sendCommandText(cmd);
+      }
+    }
+  };
+
+  recognition.onerror = function(e) {
+    if (e.error !== "no-speech") addLog("Mic error: " + e.error, "err");
+  };
+
+  recognition.onend = function() {
+    micActive = false;
+    document.getElementById("mic-btn").classList.remove("active");
+    document.getElementById("dot-mic").className = "dot";
+    if (!recognition._stopped) {
+      setTimeout(function() { startMic(false); }, 300);
+    }
+  };
+
+  recognition.start();
+}
+
+// Auto-start mic on load
+window.addEventListener("load", function() {
+  setTimeout(function() { startMic(true); }, 1200);
+});
+</script>
+</body>
+</html>

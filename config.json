@@ -1,0 +1,466 @@
+{
+  "_comment": "Core Nexus config. Paths use double backslashes. Steam games use steam:// protocol. Empty path = auto-search.",
+
+  "apps": {
+
+    "trackmania": {
+      "path": "F:\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher\\games\\Trackmania\\TmForever.exe",
+      "description": "Trackmania Nations Forever",
+      "priority": "high",
+      "flags": []
+    },
+    "minecraft": {
+      "path": "F:\\XboxGames\\Minecraft Launcher\\Content\\Minecraft.exe",
+      "description": "Minecraft Launcher",
+      "priority": "above_normal",
+      "flags": []
+    },
+    "discord": {
+      "path": "C:\\Users\\lukes\\AppData\\Local\\Discord\\Update.exe",
+      "description": "Discord",
+      "flags": ["--processStart", "Discord.exe"]
+    },
+    "chrome": {
+      "path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      "description": "Google Chrome",
+      "flags": []
+    },
+    "google chrome": {
+      "path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      "description": "Google Chrome",
+      "flags": []
+    },
+    "spotify": {
+      "path": "C:\\Users\\lukes\\AppData\\Roaming\\Spotify\\Spotify.exe",
+      "description": "Spotify",
+      "flags": []
+    },
+    "vscode": {
+      "path": "C:\\Users\\lukes\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+      "description": "Visual Studio Code",
+      "flags": []
+    },
+    "visual studio code": {
+      "path": "C:\\Users\\lukes\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+      "description": "Visual Studio Code",
+      "flags": []
+    },
+    "obs": {
+      "path": "F:\\Program Files\\obs-studio\\bin\\64bit\\obs64.exe",
+      "description": "OBS Studio",
+      "flags": []
+    },
+    "geometry dash": {
+      "path": "C:\\Users\\lukes\\Desktop\\Geometry Dash.url",
+      "description": "Geometry Dash (Steam via desktop shortcut)",
+      "flags": []
+    },
+
+    "edge": {
+      "path": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "description": "Microsoft Edge",
+      "flags": []
+    },
+    "microsoft edge": {
+      "path": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "description": "Microsoft Edge",
+      "flags": []
+    },
+
+    "steam": {
+      "path": "C:\\Program Files (x86)\\Steam\\steam.exe",
+      "description": "Steam",
+      "flags": []
+    },
+    "epic games": {
+      "path": "C:\\Program Files (x86)\\Epic Games\\Launcher\\Portal\\Binaries\\Win32\\EpicGamesLauncher.exe",
+      "description": "Epic Games Launcher",
+      "flags": []
+    },
+    "epic games launcher": {
+      "path": "C:\\Program Files (x86)\\Epic Games\\Launcher\\Portal\\Binaries\\Win32\\EpicGamesLauncher.exe",
+      "description": "Epic Games Launcher",
+      "flags": []
+    },
+    "battle.net": {
+      "path": "C:\\Program Files (x86)\\Battle.net\\Battle.net.exe",
+      "description": "Blizzard Battle.net",
+      "flags": []
+    },
+    "battlenet": {
+      "path": "C:\\Program Files (x86)\\Battle.net\\Battle.net.exe",
+      "description": "Blizzard Battle.net",
+      "flags": []
+    },
+    "ubisoft connect": {
+      "path": "C:\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher\\UbisoftConnect.exe",
+      "description": "Ubisoft Connect",
+      "flags": []
+    },
+    "ubisoft": {
+      "path": "C:\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher\\UbisoftConnect.exe",
+      "description": "Ubisoft Connect",
+      "flags": []
+    },
+
+    "war thunder": {
+      "path": "steam://rungameid/236390",
+      "description": "War Thunder",
+      "priority": "high",
+      "flags": []
+    },
+    "the farmer was replaced": {
+      "path": "steam://rungameid/2060160",
+      "description": "The Farmer Was Replaced",
+      "flags": []
+    },
+    "farmer was replaced": {
+      "path": "steam://rungameid/2060160",
+      "description": "The Farmer Was Replaced",
+      "flags": []
+    },
+    "pc building simulator": {
+      "path": "steam://rungameid/621060",
+      "description": "PC Building Simulator",
+      "flags": []
+    },
+    "repo": {
+      "path": "steam://rungameid/3241660",
+      "description": "R.E.P.O.",
+      "flags": []
+    },
+    "r.e.p.o": {
+      "path": "steam://rungameid/3241660",
+      "description": "R.E.P.O.",
+      "flags": []
+    },
+    "rainbow six siege": {
+      "path": "steam://rungameid/359550",
+      "description": "Tom Clancy's Rainbow Six Siege",
+      "priority": "high",
+      "flags": []
+    },
+    "rainbow six": {
+      "path": "steam://rungameid/359550",
+      "description": "Tom Clancy's Rainbow Six Siege",
+      "priority": "high",
+      "flags": []
+    },
+    "siege": {
+      "path": "steam://rungameid/359550",
+      "description": "Tom Clancy's Rainbow Six Siege",
+      "priority": "high",
+      "flags": []
+    },
+    "the stanley parable": {
+      "path": "steam://rungameid/1569580",
+      "description": "The Stanley Parable: Ultra Deluxe",
+      "flags": []
+    },
+    "stanley parable": {
+      "path": "steam://rungameid/1569580",
+      "description": "The Stanley Parable: Ultra Deluxe",
+      "flags": []
+    },
+    "source filmmaker": {
+      "path": "steam://rungameid/1840",
+      "description": "Source Filmmaker",
+      "flags": []
+    },
+    "sfm": {
+      "path": "steam://rungameid/1840",
+      "description": "Source Filmmaker",
+      "flags": []
+    },
+    "liar's bar": {
+      "path": "steam://rungameid/3097560",
+      "description": "Liar's Bar",
+      "priority": "high",
+      "flags": []
+    },
+    "liars bar": {
+      "path": "steam://rungameid/3097560",
+      "description": "Liar's Bar",
+      "priority": "high",
+      "flags": []
+    },
+    "poppy playtime": {
+      "path": "steam://rungameid/1721470",
+      "description": "Poppy Playtime",
+      "flags": []
+    },
+    "project playtime": {
+      "path": "steam://rungameid/1721480",
+      "description": "Project Playtime",
+      "flags": []
+    },
+    "peggle deluxe": {
+      "path": "steam://rungameid/3560",
+      "description": "Peggle Deluxe",
+      "flags": []
+    },
+    "peggle": {
+      "path": "steam://rungameid/3560",
+      "description": "Peggle Deluxe",
+      "flags": []
+    },
+    "roblox": {
+      "path": "steam://rungameid/1778820",
+      "description": "Roblox",
+      "flags": []
+    },
+
+    "fortnite": {
+      "path": "com.epicgames.launcher://apps/fn?action=launch&silent=true",
+      "description": "Fortnite (Epic Games)",
+      "priority": "high",
+      "flags": []
+    },
+
+    "roblox studio": {
+      "path": "",
+      "description": "Roblox Studio — auto-search",
+      "flags": []
+    },
+    "github desktop": {
+      "path": "C:\\Users\\lukes\\AppData\\Local\\GitHubDesktop\\GitHubDesktop.exe",
+      "description": "GitHub Desktop",
+      "flags": []
+    },
+    "github": {
+      "path": "C:\\Users\\lukes\\AppData\\Local\\GitHubDesktop\\GitHubDesktop.exe",
+      "description": "GitHub Desktop",
+      "flags": []
+    },
+    "microsoft flight simulator": {
+      "path": "",
+      "description": "Microsoft Flight Simulator — auto-search",
+      "flags": []
+    },
+    "flight simulator": {
+      "path": "",
+      "description": "Microsoft Flight Simulator — auto-search",
+      "flags": []
+    },
+    "msfs": {
+      "path": "",
+      "description": "Microsoft Flight Simulator — auto-search",
+      "flags": []
+    },
+    "msi afterburner": {
+      "path": "C:\\Program Files (x86)\\MSI Afterburner\\MSIAfterburner.exe",
+      "description": "MSI Afterburner",
+      "flags": []
+    },
+    "afterburner": {
+      "path": "C:\\Program Files (x86)\\MSI Afterburner\\MSIAfterburner.exe",
+      "description": "MSI Afterburner",
+      "flags": []
+    },
+    "google earth": {
+      "path": "C:\\Program Files\\Google\\Google Earth Pro\\client\\googleearth.exe",
+      "description": "Google Earth Pro",
+      "flags": []
+    },
+    "google earth pro": {
+      "path": "C:\\Program Files\\Google\\Google Earth Pro\\client\\googleearth.exe",
+      "description": "Google Earth Pro",
+      "flags": []
+    },
+    "lm studio": {
+      "path": "C:\\Users\\lukes\\AppData\\Local\\Programs\\LM Studio\\LM Studio.exe",
+      "description": "LM Studio",
+      "flags": []
+    },
+    "nzxt cam": {
+      "path": "C:\\Program Files (x86)\\NZXT\\CAM\\CAM.exe",
+      "description": "NZXT CAM",
+      "flags": []
+    },
+    "cam": {
+      "path": "C:\\Program Files (x86)\\NZXT\\CAM\\CAM.exe",
+      "description": "NZXT CAM",
+      "flags": []
+    },
+    "logi options": {
+      "path": "C:\\Program Files\\LogiOptionsPlus\\LogiOptionsPlus.exe",
+      "description": "Logi Options+",
+      "flags": []
+    },
+    "logi options plus": {
+      "path": "C:\\Program Files\\LogiOptionsPlus\\LogiOptionsPlus.exe",
+      "description": "Logi Options+",
+      "flags": []
+    },
+    "bambu studio": {
+      "path": "C:\\Program Files\\Bambu Studio\\bambu-studio.exe",
+      "description": "Bambu Studio (3D printing slicer)",
+      "flags": []
+    },
+    "itunes": {
+      "path": "C:\\Program Files\\iTunes\\iTunes.exe",
+      "description": "iTunes",
+      "flags": []
+    },
+    "voicemod": {
+      "path": "C:\\Program Files\\Voicemod Desktop\\Voicemod.exe",
+      "description": "Voicemod",
+      "flags": []
+    },
+    "userbenchmark": {
+      "path": "C:\\Users\\lukes\\AppData\\Local\\UserBenchmark\\UserBenchmark.exe",
+      "description": "UserBenchmark",
+      "flags": []
+    },
+    "furmark": {
+      "path": "C:\\Program Files (x86)\\Geeks3D\\Benchmarks\\FurMark_2\\FurMark2.exe",
+      "description": "FurMark 2 GPU stress test",
+      "flags": []
+    },
+    "furmark 2": {
+      "path": "C:\\Program Files (x86)\\Geeks3D\\Benchmarks\\FurMark_2\\FurMark2.exe",
+      "description": "FurMark 2",
+      "flags": []
+    },
+    "easy diffusion": {
+      "path": "C:\\Users\\lukes\\AppData\\Local\\Programs\\Easy Diffusion\\Easy Diffusion.exe",
+      "description": "Easy Diffusion (AI image generation)",
+      "flags": []
+    },
+    "modrinth": {
+      "path": "C:\\Users\\lukes\\AppData\\Local\\Programs\\Modrinth App\\Modrinth App.exe",
+      "description": "Modrinth App",
+      "flags": []
+    },
+    "modrinth app": {
+      "path": "C:\\Users\\lukes\\AppData\\Local\\Programs\\Modrinth App\\Modrinth App.exe",
+      "description": "Modrinth App",
+      "flags": []
+    },
+    "sideloadly": {
+      "path": "C:\\Program Files\\Sideloadly\\Sideloadly.exe",
+      "description": "Sideloadly (iOS sideloading)",
+      "flags": []
+    },
+    "ti connect": {
+      "path": "C:\\Program Files\\Texas Instruments\\TI Connect CE(TM) Software\\TIConnectCE.exe",
+      "description": "TI Connect CE",
+      "flags": []
+    },
+    "ti connect ce": {
+      "path": "C:\\Program Files\\Texas Instruments\\TI Connect CE(TM) Software\\TIConnectCE.exe",
+      "description": "TI Connect CE",
+      "flags": []
+    },
+    "livesplit": {
+      "path": "C:\\Users\\lukes\\Desktop\\LiveSplit.exe",
+      "description": "LiveSplit (speedrun timer) — tries desktop first, then auto-search",
+      "flags": []
+    },
+    "bluestacks": {
+      "path": "C:\\Program Files\\BlueStacks X\\BlueStacksX.exe",
+      "description": "BlueStacks X",
+      "flags": []
+    },
+    "bluestacks x": {
+      "path": "C:\\Program Files\\BlueStacks X\\BlueStacksX.exe",
+      "description": "BlueStacks X",
+      "flags": []
+    },
+    "salad": {
+      "path": "C:\\Users\\lukes\\Desktop\\Salad-1.3.3.exe",
+      "description": "Salad (crypto mining)",
+      "flags": []
+    },
+    "wemod": {
+      "path": "C:\\Users\\lukes\\AppData\\Local\\WeMod\\WeMod.exe",
+      "description": "WeMod game trainer",
+      "flags": []
+    },
+    "wand": {
+      "path": "C:\\Users\\lukes\\AppData\\Local\\WeMod\\WeMod.exe",
+      "description": "WeMod (Wand interface)",
+      "flags": []
+    },
+    "phantom racing": {
+      "path": "",
+      "description": "Phantom Racing — auto-search",
+      "flags": []
+    },
+    "call of duty": {
+      "path": "",
+      "description": "Call of Duty — auto-search",
+      "priority": "high",
+      "flags": []
+    },
+    "modern warfare": {
+      "path": "",
+      "description": "Call of Duty Modern Warfare — auto-search",
+      "priority": "high",
+      "flags": []
+    },
+    "jarvis": {
+      "path": "C:\\Users\\lukes\\Desktop\\Jarvis Assistant.exe",
+      "description": "Jarvis Assistant",
+      "flags": []
+    },
+    "jarvis assistant": {
+      "path": "C:\\Users\\lukes\\Desktop\\Jarvis Assistant.exe",
+      "description": "Jarvis Assistant",
+      "flags": []
+    },
+    "ultfone": {
+      "path": "",
+      "description": "UltFone iOS System Recovery — auto-search",
+      "flags": []
+    },
+    "pokemon infinity": {
+      "path": "",
+      "description": "Pokemon Infinity 2.3.6 — auto-search",
+      "flags": []
+    },
+    "war thunder new players": {
+      "path": "steam://rungameid/236390",
+      "description": "War Thunder",
+      "flags": []
+    }
+  },
+
+  "macros": {
+    "study_mode": {
+      "description": "Close games and Discord, open school portal",
+      "actions": [
+        { "type": "kill",   "process": "TmForever.exe",  "name": "Trackmania"  },
+        { "type": "kill",   "process": "Minecraft.exe",  "name": "Minecraft"   },
+        { "type": "kill",   "process": "Discord.exe",    "name": "Discord"     },
+        { "type": "volume", "level": 30                                         },
+        { "delay": 1 },
+        { "type": "url",    "url": "https://YOUR_SCHOOL_PORTAL_URL_HERE"       },
+        { "type": "speak",  "text": "Study mode active. Distractions eliminated." }
+      ]
+    },
+    "game_mode": {
+      "description": "Launch Discord, set volume to 60, close background apps",
+      "actions": [
+        { "type": "kill",   "process": "chrome.exe",     "name": "Chrome"     },
+        { "type": "volume", "level": 60                                        },
+        { "delay": 1 },
+        { "type": "launch", "key": "discord"                                   },
+        { "type": "speak",  "text": "Game mode activated. Discord launched." }
+      ]
+    },
+    "night_mode": {
+      "description": "Low volume, close everything, prepare to wind down",
+      "actions": [
+        { "type": "volume", "level": 15 },
+        { "type": "speak",  "text": "Night mode engaged. Volume reduced." }
+      ]
+    }
+  },
+
+  "tools": {
+    "browser":  "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "nircmd":   "F:\\Tools\\nircmd\\nircmd.exe",
+    "_note":    "nircmd optional — volume fallback. Download from nirsoft.net"
+  }
+}
