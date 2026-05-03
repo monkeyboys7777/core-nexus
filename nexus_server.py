@@ -79,7 +79,9 @@ CAPABILITIES (you are limited to exactly these action types — nothing else):
 {{"type": "macro", "name": "macro_key"}}         — run a defined macro sequence
 {{"type": "speak", "text": "message"}}           — speak additional text
 {{"type": "vision", "question": "optional specific question", "monitor": 0}}  — see and describe the screen
-{{"type": "food", "restaurant": "dominos|kfc|subway|mcdonalds|burger king|pizza hut|wendys|taco bell|etc", "item": "optional item or topping hint", "order_type": "order|reservation"}}  — open restaurant ordering page directly and navigate to item
+{{"type": "food", "restaurant": "dominos|kfc|subway|mcdonalds|etc", "item": "optional item", "order_type": "order|reservation"}}  — open restaurant ordering page
+{{"type": "window", "command": "snap_left|snap_right|maximize|minimize|focus|tile", "app": "app name", "app2": "second app for tile"}}  — window management
+{{"type": "reminder", "time": "HH:MM", "message": "reminder text", "repeat": false}}  — set a timed reminder
 
 REGISTERED APPLICATIONS:
 {apps_block or "  (none)"}
@@ -279,6 +281,31 @@ def thermal():
     except: pass
     return jsonify({"report": "  |  ".join(report) if report else "N/A"})
 
+
+@app.route("/api/usage")
+def usage():
+    try:
+        from usage_tracker import UsageTracker
+        tracker = UsageTracker()
+        return jsonify(tracker.get_summary())
+    except Exception as e:
+        return jsonify({"error": str(e), "total": 0, "today": 0, "top_apps": [], "recent": []})
+
+
+
+@app.route("/api/notifications")
+def notifications():
+    try:
+        import json as _json
+        notif_path = os.path.join(PROJECT_DIR, "notifications_log.json")
+        if os.path.exists(notif_path):
+            with open(notif_path) as f:
+                data = _json.load(f)
+            return jsonify({"notifications": data[-20:]})
+    except Exception:
+        pass
+    return jsonify({"notifications": []})
+
 # ── SocketIO events ────────────────────────────────────────────────────────────
 @socketio.on("connect")
 def on_connect():
@@ -291,4 +318,4 @@ if __name__ == "__main__":
     _APP_CACHE.update(cache)
     print(f"  [OK] App index: {len(_APP_CACHE)} apps.")
     print("  Open: http://localhost:8080\n")
-    socketio.run(app, host="0.0.0.0", port=8080, debug=False)
+    socketio.run(app, host="0.0.0.0", port=8080, debug=False, allow_unsafe_werkzeug=True)

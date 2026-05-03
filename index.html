@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CORE NEXUS</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&display=swap');
+:root{--cyan:#00e5ff;--cyan2:#00b8d4;--dark:#020810;--dark2:#040d1a;--dark3:#071424;--glow:0 0 10px #00e5ff,0 0 20px #00e5ff44;--font:'Share Tech Mono',monospace;--font2:'Orbitron',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--dark);color:var(--cyan);font-family:var(--font);overflow:hidden;height:100vh;width:100vw;cursor:crosshair}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(1px 1px at 10% 15%,rgba(0,229,255,.4) 0%,transparent 100%),radial-gradient(1px 1px at 25% 60%,rgba(0,229,255,.3) 0%,transparent 100%),radial-gradient(1px 1px at 40% 30%,rgba(0,229,255,.5) 0%,transparent 100%),radial-gradient(1px 1px at 55% 80%,rgba(0,229,255,.2) 0%,transparent 100%),radial-gradient(1px 1px at 70% 20%,rgba(0,229,255,.4) 0%,transparent 100%),radial-gradient(1px 1px at 85% 55%,rgba(0,229,255,.3) 0%,transparent 100%),radial-gradient(1px 1px at 92% 10%,rgba(0,229,255,.5) 0%,transparent 100%);pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,229,255,.015) 2px,rgba(0,229,255,.015) 4px);pointer-events:none;z-index:1;animation:scanMove 8s linear infinite}
+@keyframes scanMove{0%{background-position:0 0}100%{background-position:0 100px}}
+.scan-sweep{position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.4;animation:sweep 6s ease-in-out infinite;z-index:2;box-shadow:var(--glow)}
+@keyframes sweep{0%{top:-2px;opacity:0}10%{opacity:.6}90%{opacity:.4}100%{top:100vh;opacity:0}}
+#app{position:relative;width:100vw;height:100vh;display:grid;grid-template-columns:260px 1fr 260px;grid-template-rows:56px 1fr 110px;grid-template-areas:"header header header""left center right""footer footer footer";z-index:3}
+header{grid-area:header;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid rgba(0,229,255,.2);background:linear-gradient(180deg,rgba(0,229,255,.05) 0%,transparent 100%)}
+.logo{font-family:var(--font2);font-size:18px;font-weight:900;letter-spacing:6px;text-shadow:var(--glow);animation:ptxt 3s ease-in-out infinite}
+@keyframes ptxt{0%,100%{opacity:1}50%{opacity:.8}}
+.logo span{color:rgba(0,229,255,.4)}
+.header-right{display:flex;gap:16px;align-items:center}
+.hud-stat{font-size:9px;letter-spacing:2px;color:rgba(0,229,255,.5);text-transform:uppercase}
+.hud-stat strong{color:var(--cyan);display:block;font-size:13px}
+#clock{font-family:var(--font2);font-size:15px;font-weight:700;letter-spacing:3px;text-shadow:var(--glow)}
+.left-panel,.right-panel{padding:16px 14px;display:flex;flex-direction:column;gap:12px;overflow:hidden}
+.left-panel{grid-area:left;border-right:1px solid rgba(0,229,255,.15)}
+.right-panel{grid-area:right;border-left:1px solid rgba(0,229,255,.15)}
+.hud-card{border:1px solid rgba(0,229,255,.2);border-radius:2px;padding:10px;background:rgba(0,229,255,.02);position:relative;overflow:hidden}
+.hud-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.4}
+.hud-card-title{font-size:8px;letter-spacing:3px;color:rgba(0,229,255,.45);text-transform:uppercase;margin-bottom:9px;display:flex;align-items:center;gap:5px}
+.hud-card-title::before{content:'◆';font-size:5px;color:var(--cyan)}
+.arc-bar{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.arc-bar-label{font-size:9px;color:rgba(0,229,255,.55);min-width:28px}
+.arc-bar-track{flex:1;height:3px;background:rgba(0,229,255,.1);overflow:hidden}
+.arc-bar-fill{height:100%;background:linear-gradient(90deg,var(--cyan2),var(--cyan));box-shadow:0 0 6px var(--cyan);transition:width 1s ease;position:relative}
+.arc-bar-fill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:2px;background:#fff;box-shadow:0 0 4px #fff}
+.arc-bar-val{font-size:9px;color:var(--cyan);min-width:32px;text-align:right}
+.status-item{display:flex;align-items:center;gap:7px;margin-bottom:7px;font-size:10px;color:rgba(0,229,255,.65)}
+.status-led{width:7px;height:7px;border-radius:50%;background:rgba(0,229,255,.15);border:1px solid rgba(0,229,255,.25);flex-shrink:0;transition:all .3s}
+.status-led.on{background:var(--cyan);box-shadow:0 0 7px var(--cyan),0 0 14px rgba(0,229,255,.3);animation:lp 2s ease-in-out infinite}
+.status-led.err{background:#ff1744;box-shadow:0 0 7px #ff1744}
+@keyframes lp{0%,100%{opacity:1}50%{opacity:.55}}
+.hud-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(0,229,255,.25),transparent);margin:5px 0}
+.app-row{display:flex;align-items:center;gap:7px;padding:3px 5px;cursor:pointer;border:1px solid transparent;transition:all .15s;font-size:10px;color:rgba(0,229,255,.55)}
+.app-row:hover{border-color:rgba(0,229,255,.3);background:rgba(0,229,255,.05);color:var(--cyan)}
+.app-rank{font-size:8px;color:rgba(0,229,255,.25);min-width:12px}
+.app-name{flex:1}
+.app-ct{font-size:8px;color:rgba(0,229,255,.35)}
+.log-scroll{flex:1;overflow-y:auto;font-size:10px;line-height:1.7;scrollbar-width:thin;scrollbar-color:rgba(0,229,255,.15) transparent}
+.log-scroll::-webkit-scrollbar{width:2px}
+.log-scroll::-webkit-scrollbar-thumb{background:rgba(0,229,255,.15)}
+.log-line{display:flex;gap:7px;padding:1px 0;animation:fi .25s ease}
+@keyframes fi{from{opacity:0;transform:translateX(-5px)}to{opacity:1;transform:none}}
+.log-ts{color:rgba(0,229,255,.25);min-width:46px;font-size:9px}
+.log-txt{color:rgba(0,229,255,.6);flex:1;word-break:break-word}
+.log-txt.nexus{color:var(--cyan);text-shadow:0 0 6px rgba(0,229,255,.35)}
+.log-txt.err{color:#ff4569}
+.log-txt.warn{color:#ffd600}
+.log-txt.ok{color:#69ff8a}
+.notif-item{font-size:9px;padding:5px 7px;margin-bottom:3px;border-left:2px solid var(--cyan);background:rgba(0,229,255,.03);color:rgba(0,229,255,.65);animation:fi .3s ease;line-height:1.5}
+.notif-item.warning{border-color:#ffd600}
+.center-panel{grid-area:center;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.arc-reactor{position:relative;width:300px;height:300px;flex-shrink:0}
+.arc-reactor svg{position:absolute;inset:0;width:100%;height:100%}
+.ring-outer{animation:ss 20s linear infinite;transform-origin:center}
+.ring-mid{animation:ss 12s linear infinite reverse;transform-origin:center}
+.ring-inner{animation:ss 7s linear infinite;transform-origin:center}
+.ring-data{animation:ss 35s linear infinite reverse;transform-origin:center}
+@keyframes ss{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.core-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70px;height:70px;border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,.55) 0%,rgba(0,229,255,.08) 50%,transparent 70%);box-shadow:0 0 25px rgba(0,229,255,.7),0 0 50px rgba(0,229,255,.35),0 0 90px rgba(0,229,255,.15);animation:cp 2s ease-in-out infinite}
+@keyframes cp{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:1}50%{transform:translate(-50%,-50%) scale(1.12);opacity:.75}}
+.core-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--font2);font-size:10px;font-weight:700;letter-spacing:2px;text-align:center;text-shadow:var(--glow);z-index:2;white-space:nowrap}
+.core-label .big{font-size:18px;display:block;margin-bottom:2px}
+.reactor-stat{position:absolute;font-size:8px;letter-spacing:1px;color:rgba(0,229,255,.45);text-transform:uppercase}
+.reactor-stat.top{top:6px;left:50%;transform:translateX(-50%)}
+.reactor-stat.bottom{bottom:6px;left:50%;transform:translateX(-50%)}
+.reactor-stat.left{left:2px;top:50%;transform:translateY(-50%);writing-mode:vertical-rl}
+.reactor-stat.right{right:2px;top:50%;transform:translateY(-50%);writing-mode:vertical-lr}
+footer{grid-area:footer;border-top:1px solid rgba(0,229,255,.2);background:linear-gradient(0deg,rgba(0,229,255,.04) 0%,transparent 100%);display:flex;flex-direction:column;padding:8px 20px;gap:7px}
+.cmd-row{display:flex;gap:10px;align-items:center}
+.cmd-prompt{font-family:var(--font2);font-size:13px;font-weight:700;color:var(--cyan);text-shadow:var(--glow);white-space:nowrap}
+#cmd-input{flex:1;background:rgba(0,229,255,.04);border:none;border-bottom:1px solid rgba(0,229,255,.35);color:var(--cyan);font-family:var(--font);font-size:13px;padding:5px 4px;outline:none;letter-spacing:1px;caret-color:var(--cyan);transition:border-color .2s}
+#cmd-input:focus{border-bottom-color:var(--cyan);box-shadow:0 2px 0 0 rgba(0,229,255,.25);background:rgba(0,229,255,.05)}
+#cmd-input::placeholder{color:rgba(0,229,255,.2)}
+#send-btn{background:transparent;border:1px solid rgba(0,229,255,.45);color:var(--cyan);font-family:var(--font2);font-size:10px;font-weight:700;letter-spacing:2px;padding:7px 18px;cursor:pointer;transition:all .15s;text-transform:uppercase}
+#send-btn:hover{background:rgba(0,229,255,.1);border-color:var(--cyan);box-shadow:0 0 8px rgba(0,229,255,.4)}
+.footer-stats{display:flex;gap:20px}
+.f-stat{font-size:8px;letter-spacing:2px;color:rgba(0,229,255,.35);text-transform:uppercase}
+.f-stat span{color:rgba(0,229,255,.6);margin-left:4px}
+.corner{position:fixed;width:36px;height:36px;z-index:4}
+.corner::before,.corner::after{content:'';position:absolute;background:var(--cyan);box-shadow:0 0 5px var(--cyan)}
+.corner::before{width:100%;height:1px}
+.corner::after{width:1px;height:100%}
+.corner.tl{top:0;left:0}.corner.tr{top:0;right:0;transform:scaleX(-1)}.corner.bl{bottom:0;left:0;transform:scaleY(-1)}.corner.br{bottom:0;right:0;transform:scale(-1)}
+#confirm-modal{display:none;position:fixed;inset:0;background:rgba(2,8,16,.85);align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px)}
+#confirm-modal.show{display:flex}
+.modal-box{border:1px solid rgba(0,229,255,.4);background:var(--dark2);padding:28px;max-width:380px;width:90%;box-shadow:0 0 40px rgba(0,229,255,.2)}
+.modal-box::before{content:'⚠ CONFIRMATION REQUIRED';display:block;font-family:var(--font2);font-size:10px;letter-spacing:3px;color:#ffd600;text-shadow:0 0 10px #ffd600;margin-bottom:14px}
+.modal-box p{font-size:12px;color:rgba(0,229,255,.75);margin-bottom:20px;line-height:1.6}
+.modal-btns{display:flex;gap:10px}
+.btn-confirm,.btn-cancel{flex:1;padding:9px;background:transparent;font-family:var(--font);cursor:pointer;font-size:11px;letter-spacing:2px;transition:all .15s;text-transform:uppercase}
+.btn-confirm{border:1px solid #ff4569;color:#ff4569}
+.btn-confirm:hover{background:rgba(255,69,105,.15);box-shadow:0 0 10px rgba(255,69,105,.35)}
+.btn-cancel{border:1px solid rgba(0,229,255,.3);color:rgba(0,229,255,.55)}
+.btn-cancel:hover{background:rgba(0,229,255,.07);border-color:var(--cyan)}
+</style>
+</head>
+<body>
+<div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+<div class="scan-sweep"></div>
+<div id="app">
+<header>
+  <div class="logo">CORE <span>NEXUS</span></div>
+  <div id="clock">00:00:00</div>
+  <div class="header-right">
+    <div class="hud-stat">CPU<strong id="h-cpu">—%</strong></div>
+    <div class="hud-stat">GPU<strong id="h-gpu">—</strong></div>
+    <div class="hud-stat">CMDS<strong id="h-cmd">0</strong></div>
+    <div class="hud-stat" id="conn-stat" style="color:rgba(0,229,255,.4)">CONNECTING</div>
+  </div>
+</header>
+<div class="left-panel">
+  <div class="hud-card">
+    <div class="hud-card-title">System Status</div>
+    <div class="status-item"><div class="status-led" id="led-ollama"></div>Ollama AI Engine</div>
+    <div class="status-item"><div class="status-led on" id="led-server"></div>Web UI Server</div>
+    <div class="status-item"><div class="status-led on" id="led-nexus"></div>Core Nexus</div>
+    <div class="hud-divider"></div>
+    <div class="arc-bar"><span class="arc-bar-label">CPU</span><div class="arc-bar-track"><div class="arc-bar-fill" id="bar-cpu" style="width:0%"></div></div><span class="arc-bar-val" id="val-cpu">0%</span></div>
+    <div class="arc-bar"><span class="arc-bar-label">GPU</span><div class="arc-bar-track"><div class="arc-bar-fill" id="bar-gpu" style="width:0%"></div></div><span class="arc-bar-val" id="val-gpu">—</span></div>
+  </div>
+  <div class="hud-card" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+    <div class="hud-card-title">Activity Log</div>
+    <div class="log-scroll" id="log"></div>
+  </div>
+</div>
+<div class="center-panel">
+  <div class="arc-reactor">
+    <div class="reactor-stat top" id="r-top">SYSTEM ONLINE</div>
+    <div class="reactor-stat bottom" id="r-bot">AWAITING INPUT</div>
+    <div class="reactor-stat left">NEXUS v2.0</div>
+    <div class="reactor-stat right">gemma3:4b</div>
+    <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+      <defs><filter id="glow"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      <g class="ring-data">
+        <circle cx="150" cy="150" r="138" fill="none" stroke="rgba(0,229,255,.07)" stroke-width="1"/>
+        <g stroke="rgba(0,229,255,.28)" stroke-width="1">
+          <line x1="150" y1="12" x2="150" y2="22" transform="rotate(0 150 150)"/><line x1="150" y1="12" x2="150" y2="22" transform="rotate(30 150 150)"/><line x1="150" y1="12" x2="150" y2="22" transform="rotate(60 150 150)"/><line x1="150" y1="12" x2="150" y2="22" transform="rotate(90 150 150)"/><line x1="150" y1="12" x2="150" y2="22" transform="rotate(120 150 150)"/><line x1="150" y1="12" x2="150" y2="22" transform="rotate(150 150 150)"/><line x1="150" y1="12" x2="150" y2="22" transform="rotate(180 150 150)"/><line x1="150" y1="12" x2="150" y2="22" transform="rotate(210 150 150)"/><line x1="150" y1="12" x2="150" y2="22" transform="rotate(240 150 150)"/><line x1="150" y1="12" x2="150" y2="22" transform="rotate(270 150 150)"/><line x1="150" y1="12" x2="150" y2="22" transform="rotate(300 150 150)"/><line x1="150" y1="12" x2="150" y2="22" transform="rotate(330 150 150)"/>
+        </g>
+      </g>
+      <g class="ring-outer">
+        <circle cx="150" cy="150" r="122" fill="none" stroke="rgba(0,229,255,.13)" stroke-width="1.5"/>
+        <circle cx="150" cy="150" r="122" fill="none" stroke="rgba(0,229,255,.55)" stroke-width="1.5" stroke-dasharray="55 18 7 18 55 190" stroke-linecap="round"/>
+        <polygon points="150,28 154,35 150,42 146,35" fill="rgba(0,229,255,.65)"/>
+        <polygon points="150,28 154,35 150,42 146,35" fill="rgba(0,229,255,.65)" transform="rotate(90 150 150)"/>
+        <polygon points="150,28 154,35 150,42 146,35" fill="rgba(0,229,255,.65)" transform="rotate(180 150 150)"/>
+        <polygon points="150,28 154,35 150,42 146,35" fill="rgba(0,229,255,.65)" transform="rotate(270 150 150)"/>
+      </g>
+      <g class="ring-mid">
+        <circle cx="150" cy="150" r="100" fill="none" stroke="rgba(0,229,255,.1)" stroke-width="1"/>
+        <circle cx="150" cy="150" r="100" fill="none" stroke="rgba(0,229,255,.5)" stroke-width="2" stroke-dasharray="38 13 5 13 38 270" stroke-linecap="round"/>
+        <circle cx="150" cy="50" r="3.5" fill="rgba(0,229,255,.8)"/>
+        <circle cx="150" cy="50" r="3.5" fill="rgba(0,229,255,.8)" transform="rotate(120 150 150)"/>
+        <circle cx="150" cy="50" r="3.5" fill="rgba(0,229,255,.8)" transform="rotate(240 150 150)"/>
+      </g>
+      <g class="ring-inner">
+        <circle cx="150" cy="150" r="80" fill="none" stroke="rgba(0,229,255,.12)" stroke-width="1"/>
+        <circle cx="150" cy="150" r="80" fill="none" stroke="rgba(0,229,255,.9)" stroke-width="2.5" stroke-dasharray="28 9 5 9 28 370" stroke-linecap="round" filter="url(#glow)"/>
+        <path d="M 150 70 A 80 80 0 0 1 219 112" fill="none" stroke="rgba(0,229,255,.75)" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 219 188 A 80 80 0 0 1 150 230" fill="none" stroke="rgba(0,229,255,.75)" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 81 188 A 80 80 0 0 1 81 112" fill="none" stroke="rgba(0,229,255,.75)" stroke-width="2.5" stroke-linecap="round"/>
+      </g>
+      <circle cx="150" cy="150" r="55" fill="none" stroke="rgba(0,229,255,.28)" stroke-width="1.5"/>
+      <circle cx="150" cy="150" r="55" fill="none" stroke="rgba(0,229,255,.5)" stroke-width="1" stroke-dasharray="9 7 9 7 9 7" stroke-linecap="round"/>
+      <circle cx="150" cy="150" r="40" fill="rgba(0,229,255,.04)" stroke="rgba(0,229,255,.28)" stroke-width="1"/>
+      <line x1="150" y1="0" x2="150" y2="55" stroke="rgba(0,229,255,.12)" stroke-width="0.5"/>
+      <line x1="150" y1="245" x2="150" y2="300" stroke="rgba(0,229,255,.12)" stroke-width="0.5"/>
+      <line x1="0" y1="150" x2="95" y2="150" stroke="rgba(0,229,255,.12)" stroke-width="0.5"/>
+      <line x1="205" y1="150" x2="300" y2="150" stroke="rgba(0,229,255,.12)" stroke-width="0.5"/>
+    </svg>
+    <div class="core-glow"></div>
+    <div class="core-label"><span class="big">NX</span>ONLINE</div>
+  </div>
+</div>
+<div class="right-panel">
+  <div class="hud-card">
+    <div class="hud-card-title">Session Data</div>
+    <div class="arc-bar"><span class="arc-bar-label">CMD</span><div class="arc-bar-track"><div class="arc-bar-fill" id="bar-cmd" style="width:5%"></div></div><span class="arc-bar-val" id="val-cmd">0</span></div>
+    <div class="arc-bar"><span class="arc-bar-label">ACT</span><div class="arc-bar-track"><div class="arc-bar-fill" id="bar-act" style="width:2%"></div></div><span class="arc-bar-val" id="val-act">0</span></div>
+    <div class="hud-divider"></div>
+    <div style="display:flex;justify-content:space-between;font-size:9px;color:rgba(0,229,255,.45)"><span>TOTAL LAUNCHES</span><span id="v-total" style="color:var(--cyan)">—</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:9px;color:rgba(0,229,255,.45);margin-top:3px"><span>TODAY</span><span id="v-today" style="color:var(--cyan)">—</span></div>
+  </div>
+  <div class="hud-card" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+    <div class="hud-card-title">Top Applications</div>
+    <div id="app-list" style="overflow-y:auto;flex:1"></div>
+  </div>
+  <div class="hud-card" style="max-height:120px;overflow-y:auto">
+    <div class="hud-card-title">Notifications</div>
+    <div id="notif-list"></div>
+  </div>
+</div>
+<footer>
+  <div class="cmd-row">
+    <span class="cmd-prompt">NEXUS &gt;</span>
+    <input id="cmd-input" type="text" placeholder="Enter command or speak after wake word..." autocomplete="off"/>
+    <button id="send-btn">EXECUTE</button>
+  </div>
+  <div class="footer-stats">
+    <span class="f-stat">STATUS<span id="fs-status">ONLINE</span></span>
+    <span class="f-stat">UPTIME<span id="fs-uptime">0s</span></span>
+    <span class="f-stat">INDEX<span id="fs-index">—</span></span>
+    <span class="f-stat">MODEL<span>gemma3:4b</span></span>
+    <span class="f-stat">WAKE WORD<span>HEY JARVIS</span></span>
+  </div>
+</footer>
+</div>
+<div id="confirm-modal">
+  <div class="modal-box">
+    <p id="confirm-text">Confirm this action?</p>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="sendConfirm(false)">CANCEL</button>
+      <button class="btn-confirm" onclick="sendConfirm(true)">CONFIRM</button>
+    </div>
+  </div>
+</div>
+<script>
+const socket=io();let cmdCount=0,actCount=0,startTime=Date.now(),pendingPlan=null;
+socket.on('connect',()=>{setLed('led-nexus','on');document.getElementById('conn-stat').textContent='ONLINE';document.getElementById('conn-stat').style.color='var(--cyan)';addLog('Core Nexus connected.','ok')});
+socket.on('disconnect',()=>{setLed('led-nexus','');addLog('Disconnected.','err')});
+socket.on('nexus_speak',d=>addLog('NEXUS: '+d.text,'nexus'));
+socket.on('command_received',d=>{addLog('CMD: '+d.command,'');cmdCount++;document.getElementById('h-cmd').textContent=cmdCount;updateBars()});
+socket.on('actions_complete',()=>{actCount++;updateBars()});
+socket.on('notification',d=>{addLog('ALERT: '+d.message,'warn');addNotif(d)});
+socket.on('confirm_required',d=>{pendingPlan=d.plan;document.getElementById('confirm-text').textContent=d.prompt;document.getElementById('confirm-modal').classList.add('show')});
+document.getElementById('send-btn').addEventListener('click',sendCmd);
+document.getElementById('cmd-input').addEventListener('keydown',e=>{if(e.key==='Enter')sendCmd()});
+function sendCmd(){const el=document.getElementById('cmd-input'),cmd=el.value.trim();if(!cmd)return;el.value='';fetch('/api/command',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({command:cmd})}).catch(e=>addLog('Error: '+e,'err'))}
+function sendConfirm(c){document.getElementById('confirm-modal').classList.remove('show');if(!pendingPlan)return;fetch('/api/confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({confirmed:c,plan:pendingPlan})});pendingPlan=null}
+function addLog(text,cls){const log=document.getElementById('log'),ts=new Date().toTimeString().slice(0,8),el=document.createElement('div');el.className='log-line';el.innerHTML=`<span class="log-ts">${ts}</span><span class="log-txt ${cls||''}">${text}</span>`;log.appendChild(el);log.scrollTop=log.scrollHeight;while(log.children.length>200)log.removeChild(log.firstChild)}
+function addNotif(d){const list=document.getElementById('notif-list'),el=document.createElement('div');el.className='notif-item '+(d.category||'');el.textContent=d.message;list.insertBefore(el,list.firstChild);while(list.children.length>10)list.removeChild(list.lastChild)}
+function setLed(id,cls){const el=document.getElementById(id);if(el)el.className='status-led '+cls}
+function updateBars(){document.getElementById('val-cmd').textContent=cmdCount;document.getElementById('bar-cmd').style.width=Math.min(100,cmdCount*5)+'%';document.getElementById('val-act').textContent=actCount;document.getElementById('bar-act').style.width=Math.min(100,actCount*8)+'%'}
+const msgs=['AWAITING INPUT','SYSTEMS NOMINAL','NEURAL NET ACTIVE','MONITORING','STANDING BY'];let mi=0;setInterval(()=>{mi=(mi+1)%msgs.length;document.getElementById('r-bot').textContent=msgs[mi]},4000);
+async function pollStatus(){try{const r=await fetch('/api/status'),d=await r.json();setLed('led-ollama',d.ollama?'on':'err');const c=Math.round(d.cpu||0);document.getElementById('h-cpu').textContent=c+'%';document.getElementById('bar-cpu').style.width=c+'%';document.getElementById('val-cpu').textContent=c+'%';document.getElementById('r-top').textContent=d.ollama?'OLLAMA ONLINE':'OLLAMA OFFLINE'}catch(e){}}
+async function pollThermal(){try{const r=await fetch('/api/thermal'),d=await r.json(),rpt=d.report||'';document.getElementById('h-gpu').textContent=rpt||'—';const m=rpt.match(/(\d+)%/);if(m){document.getElementById('bar-gpu').style.width=m[1]+'%';document.getElementById('val-gpu').textContent=m[1]+'%'}}catch(e){}}
+async function pollUsage(){try{const r=await fetch('/api/usage'),d=await r.json();document.getElementById('v-total').textContent=d.total||0;document.getElementById('v-today').textContent=d.today||0;document.getElementById('fs-index').textContent=(d.total||0)+' launches';const apps=d.top_apps||[];document.getElementById('app-list').innerHTML=apps.slice(0,8).map((a,i)=>`<div class="app-row" onclick="launchApp('${a.app}')"><span class="app-rank">${i+1}</span><span class="app-name">${a.app}</span><span class="app-ct">${a.count}x</span></div>`).join('')||'<div style="font-size:9px;color:rgba(0,229,255,.25);padding:3px">No data yet</div>'}catch(e){}}
+function launchApp(n){fetch('/api/command',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({command:'open '+n})})}
+function tick(){const n=new Date();document.getElementById('clock').textContent=n.toTimeString().slice(0,8);const u=Math.floor((Date.now()-startTime)/1e3),h=Math.floor(u/3600),m=Math.floor((u%3600)/60),s=u%60;document.getElementById('fs-uptime').textContent=h>0?`${h}h${m}m`:m>0?`${m}m${s}s`:`${s}s`}
+pollStatus();pollThermal();pollUsage();
+setInterval(pollStatus,5000);setInterval(pollThermal,10000);setInterval(pollUsage,15000);setInterval(tick,1000);tick();
+addLog('CORE NEXUS dashboard initialised.','ok');
+</script>
+</body>
+</html>

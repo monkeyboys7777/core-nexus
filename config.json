@@ -1,8 +1,6 @@
 {
   "_comment": "Core Nexus config. Paths use double backslashes. Steam games use steam:// protocol. Empty path = auto-search.",
-
   "apps": {
-
     "trackmania": {
       "path": "F:\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher\\games\\Trackmania\\TmForever.exe",
       "description": "Trackmania Nations Forever",
@@ -18,7 +16,10 @@
     "discord": {
       "path": "C:\\Users\\lukes\\AppData\\Local\\Discord\\Update.exe",
       "description": "Discord",
-      "flags": ["--processStart", "Discord.exe"]
+      "flags": [
+        "--processStart",
+        "Discord.exe"
+      ]
     },
     "chrome": {
       "path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
@@ -55,7 +56,6 @@
       "description": "Geometry Dash (Steam via desktop shortcut)",
       "flags": []
     },
-
     "edge": {
       "path": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
       "description": "Microsoft Edge",
@@ -66,7 +66,6 @@
       "description": "Microsoft Edge",
       "flags": []
     },
-
     "steam": {
       "path": "C:\\Program Files (x86)\\Steam\\steam.exe",
       "description": "Steam",
@@ -102,7 +101,6 @@
       "description": "Ubisoft Connect",
       "flags": []
     },
-
     "war thunder": {
       "path": "steam://rungameid/236390",
       "description": "War Thunder",
@@ -209,17 +207,15 @@
       "description": "Roblox",
       "flags": []
     },
-
     "fortnite": {
       "path": "com.epicgames.launcher://apps/fn?action=launch&silent=true",
       "description": "Fortnite (Epic Games)",
       "priority": "high",
       "flags": []
     },
-
     "roblox studio": {
       "path": "",
-      "description": "Roblox Studio — auto-search",
+      "description": "Roblox Studio \u2014 auto-search",
       "flags": []
     },
     "github desktop": {
@@ -234,17 +230,17 @@
     },
     "microsoft flight simulator": {
       "path": "",
-      "description": "Microsoft Flight Simulator — auto-search",
+      "description": "Microsoft Flight Simulator \u2014 auto-search",
       "flags": []
     },
     "flight simulator": {
       "path": "",
-      "description": "Microsoft Flight Simulator — auto-search",
+      "description": "Microsoft Flight Simulator \u2014 auto-search",
       "flags": []
     },
     "msfs": {
       "path": "",
-      "description": "Microsoft Flight Simulator — auto-search",
+      "description": "Microsoft Flight Simulator \u2014 auto-search",
       "flags": []
     },
     "msi afterburner": {
@@ -354,7 +350,7 @@
     },
     "livesplit": {
       "path": "C:\\Users\\lukes\\Desktop\\LiveSplit.exe",
-      "description": "LiveSplit (speedrun timer) — tries desktop first, then auto-search",
+      "description": "LiveSplit (speedrun timer) \u2014 tries desktop first, then auto-search",
       "flags": []
     },
     "bluestacks": {
@@ -384,18 +380,18 @@
     },
     "phantom racing": {
       "path": "",
-      "description": "Phantom Racing — auto-search",
+      "description": "Phantom Racing \u2014 auto-search",
       "flags": []
     },
     "call of duty": {
       "path": "",
-      "description": "Call of Duty — auto-search",
+      "description": "Call of Duty \u2014 auto-search",
       "priority": "high",
       "flags": []
     },
     "modern warfare": {
       "path": "",
-      "description": "Call of Duty Modern Warfare — auto-search",
+      "description": "Call of Duty Modern Warfare \u2014 auto-search",
       "priority": "high",
       "flags": []
     },
@@ -411,12 +407,12 @@
     },
     "ultfone": {
       "path": "",
-      "description": "UltFone iOS System Recovery — auto-search",
+      "description": "UltFone iOS System Recovery \u2014 auto-search",
       "flags": []
     },
     "pokemon infinity": {
       "path": "",
-      "description": "Pokemon Infinity 2.3.6 — auto-search",
+      "description": "Pokemon Infinity 2.3.6 \u2014 auto-search",
       "flags": []
     },
     "war thunder new players": {
@@ -425,42 +421,92 @@
       "flags": []
     }
   },
-
   "macros": {
     "study_mode": {
       "description": "Close games and Discord, open school portal",
       "actions": [
-        { "type": "kill",   "process": "TmForever.exe",  "name": "Trackmania"  },
-        { "type": "kill",   "process": "Minecraft.exe",  "name": "Minecraft"   },
-        { "type": "kill",   "process": "Discord.exe",    "name": "Discord"     },
-        { "type": "volume", "level": 30                                         },
-        { "delay": 1 },
-        { "type": "url",    "url": "https://YOUR_SCHOOL_PORTAL_URL_HERE"       },
-        { "type": "speak",  "text": "Study mode active. Distractions eliminated." }
+        {
+          "type": "kill",
+          "process": "TmForever.exe",
+          "name": "Trackmania"
+        },
+        {
+          "type": "kill",
+          "process": "Minecraft.exe",
+          "name": "Minecraft"
+        },
+        {
+          "type": "kill",
+          "process": "Discord.exe",
+          "name": "Discord"
+        },
+        {
+          "type": "volume",
+          "level": 30
+        },
+        {
+          "delay": 1
+        },
+        {
+          "type": "url",
+          "url": "https://YOUR_SCHOOL_PORTAL_URL_HERE"
+        },
+        {
+          "type": "speak",
+          "text": "Study mode active. Distractions eliminated."
+        }
       ]
     },
     "game_mode": {
       "description": "Launch Discord, set volume to 60, close background apps",
       "actions": [
-        { "type": "kill",   "process": "chrome.exe",     "name": "Chrome"     },
-        { "type": "volume", "level": 60                                        },
-        { "delay": 1 },
-        { "type": "launch", "key": "discord"                                   },
-        { "type": "speak",  "text": "Game mode activated. Discord launched." }
+        {
+          "type": "kill",
+          "process": "chrome.exe",
+          "name": "Chrome"
+        },
+        {
+          "type": "volume",
+          "level": 60
+        },
+        {
+          "delay": 1
+        },
+        {
+          "type": "launch",
+          "key": "discord"
+        },
+        {
+          "type": "speak",
+          "text": "Game mode activated. Discord launched."
+        }
       ]
     },
     "night_mode": {
       "description": "Low volume, close everything, prepare to wind down",
       "actions": [
-        { "type": "volume", "level": 15 },
-        { "type": "speak",  "text": "Night mode engaged. Volume reduced." }
+        {
+          "type": "volume",
+          "level": 15
+        },
+        {
+          "type": "speak",
+          "text": "Night mode engaged. Volume reduced."
+        }
       ]
     }
   },
-
   "tools": {
-    "browser":  "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-    "nircmd":   "F:\\Tools\\nircmd\\nircmd.exe",
-    "_note":    "nircmd optional — volume fallback. Download from nirsoft.net"
-  }
+    "browser": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "nircmd": "F:\\Tools\\nircmd\\nircmd.exe",
+    "_note": "nircmd optional \u2014 volume fallback. Download from nirsoft.net"
+  },
+  "wake_keyword": "hey_jarvis",
+  "notifications": {
+    "cpu_threshold": 90,
+    "gpu_temp_threshold": 85,
+    "break_interval_min": 120,
+    "_note": "Adjust thresholds to your preference"
+  },
+  "_wake_note": "Options: hey_jarvis, alexa, hey_mycroft, hey_rhasspy \u2014 or use a custom .tflite model"
 }

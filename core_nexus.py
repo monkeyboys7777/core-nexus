@@ -13,6 +13,7 @@ import sys
 import json
 import time
 import argparse
+import threading
 import urllib.request
 import urllib.error
 
@@ -29,6 +30,20 @@ try:
 except ImportError:
     TTS_AVAILABLE = False
     print("[WARN] pyttsx3 not installed. TTS disabled.")
+
+try:
+    from tts_piper import PiperSpeaker
+    PIPER_MODULE_AVAILABLE = True
+except ImportError:
+    PIPER_MODULE_AVAILABLE = False
+
+try:
+    from wake_word import WakeWordDetector
+    WAKE_WORD_AVAILABLE = True
+except ImportError:
+    WAKE_WORD_AVAILABLE = False
+
+from notifications import NotificationSystem
 
 from executor import ActionExecutor, _APP_CACHE
 from app_scanner import build_cache
@@ -93,7 +108,9 @@ CAPABILITIES (you are limited to exactly these action types — nothing else):
 {{"type": "macro", "name": "macro_key"}}         — run a defined macro sequence
 {{"type": "speak", "text": "message"}}           — speak additional text
 {{"type": "vision", "question": "optional specific question", "monitor": 0}}  — see and describe the screen
-{{"type": "food", "restaurant": "dominos|kfc|subway|mcdonalds|burger king|pizza hut|wendys|taco bell|etc", "item": "optional item or topping hint", "order_type": "order|reservation"}}  — open restaurant ordering page directly and navigate to item
+{{"type": "food", "restaurant": "dominos|kfc|subway|mcdonalds|etc", "item": "optional item", "order_type": "order|reservation"}}  — open restaurant ordering page
+{{"type": "window", "command": "snap_left|snap_right|maximize|minimize|focus|tile", "app": "app name", "app2": "second app for tile"}}  — window management
+{{"type": "reminder", "time": "HH:MM", "message": "reminder text", "repeat": false}}  — set a timed reminder
 
 REGISTERED APPLICATIONS:
 {apps_block if apps_block else "  (none configured)"}
@@ -141,27 +158,48 @@ Return this exact JSON structure — nothing else:
 
 
 class Speaker:
+    """
+    Speaker with Piper neural TTS primary, pyttsx3 fallback.
+    """
     def __init__(self):
-        self.engine = None
+        self._impl = None
+        # Try Piper neural TTS first
+        if PIPER_MODULE_AVAILABLE:
+            try:
+                self._impl = PiperSpeaker()
+                if self._impl.is_neural:
+                    print("  [TTS] Neural voice active (Piper).")
+                    return
+            except Exception as e:
+                print(f"  [TTS] Piper init error: {e}")
+                self._impl = None
+        # Fallback to pyttsx3
         if TTS_AVAILABLE:
             try:
-                self.engine = pyttsx3.init()
-                self.engine.setProperty("rate", 185)
-                voices = self.engine.getProperty("voices")
+                engine = pyttsx3.init()
+                engine.setProperty("rate", 185)
+                voices = engine.getProperty("voices")
                 for v in voices:
-                    if "zira" in v.name.lower() or "david" in v.name.lower():
-                        self.engine.setProperty("voice", v.id)
+                    if "david" in v.name.lower() or "zira" in v.name.lower():
+                        engine.setProperty("voice", v.id)
                         break
+                self._engine = engine
+                self._impl   = None
+                print("  [TTS] Using pyttsx3 fallback.")
             except Exception as e:
-                print(f"[WARN] TTS init failed: {e}")
-                self.engine = None
+                print(f"  [TTS] pyttsx3 init failed: {e}")
+                self._engine = None
+        else:
+            self._engine = None
 
     def say(self, text: str):
         print(f"  NEXUS > {text}")
-        if self.engine:
+        if self._impl:
+            self._impl.say(text)
+        elif hasattr(self, "_engine") and self._engine:
             try:
-                self.engine.say(text)
-                self.engine.runAndWait()
+                self._engine.say(text)
+                self._engine.runAndWait()
             except Exception:
                 pass
 
@@ -318,6 +356,25 @@ def main():
     ai       = NexusAI(config, memory)
     executor = ActionExecutor(config, speaker)
     executor.app_cache = _APP_CACHE
+
+    # Start notification system
+    notifications = NotificationSystem(speaker)
+    notifications.start()
+    executor.notifications = notifications
+
+    # Start wake word detector if configured
+    pico_key     = config.get("picovoice_key", "")
+    wake_keyword = config.get("wake_keyword", "jarvis")
+    wake_detector = None
+    if not text_mode and WAKE_WORD_AVAILABLE and pico_key:
+        wake_detected = threading.Event()
+        wake_detector = WakeWordDetector(
+            access_key=pico_key,
+            on_wake=lambda: wake_detected.set(),
+            keyword=wake_keyword
+        )
+        if wake_detector.is_active or True:
+            wake_detector.start()
 
     if text_mode:
         print("  [TEXT MODE] Type your command. No wake word needed.\n")

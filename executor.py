@@ -12,6 +12,17 @@ import glob
 
 from fuzzy_match import correct_speech, FailureTracker
 from app_scanner import find_in_cache, build_cache
+from usage_tracker import UsageTracker
+
+
+try:
+    from window_manager import dispatch_window_action
+    WINDOW_MANAGER_AVAILABLE = True
+except ImportError:
+    WINDOW_MANAGER_AVAILABLE = False
+
+# Global usage tracker
+_USAGE_TRACKER = UsageTracker()
 
 try:
     from screen_vision import describe_screen, analyse_screen, list_monitors
@@ -146,26 +157,29 @@ def find_exe(name: str) -> str | None:
 
 class ActionExecutor:
     def __init__(self, config: dict, speaker):
-        self.config   = config
-        self.speaker  = speaker
-        self.failures = _FAILURE_TRACKER
-        # Load cache reference (built at startup)
+        self.config    = config
+        self.speaker   = speaker
+        self.failures  = _FAILURE_TRACKER
         self.app_cache = _APP_CACHE
+        self.usage     = _USAGE_TRACKER
+
 
     def execute(self, action: dict):
         t = action.get("type", "")
         dispatch = {
-            "launch":  self._launch,
-            "volume":  self._volume,
-            "url":     self._url,
-            "search":  self._search,
-            "kill":    self._kill,
-            "power":   self._power,
-            "thermal": self._thermal,
-            "macro":   self._macro,
-            "speak":   self._speak,
-            "vision":  self._vision,
-            "food":    self._food,
+            "launch":   self._launch,
+            "volume":   self._volume,
+            "url":      self._url,
+            "search":   self._search,
+            "kill":     self._kill,
+            "power":    self._power,
+            "thermal":  self._thermal,
+            "macro":    self._macro,
+            "speak":    self._speak,
+            "vision":   self._vision,
+            "food":     self._food,
+            "window":   self._window,
+            "reminder": self._reminder,
         }
         handler = dispatch.get(t)
         if handler:
@@ -274,12 +288,15 @@ class ActionExecutor:
             proc = subprocess.Popen([path] + flags)
             print(f"  [LAUNCH] {key} — PID {proc.pid}")
             self.failures.record_success(key, path)
+            self.usage.record(key, success=True)
         except FileNotFoundError:
             self.failures.record_failure(key, path)
+            self.usage.record(key, success=False)
             self.speaker.say(f"Launch failed for {key}. Path not found.")
             return
         except Exception as launch_err:
             self.failures.record_failure(key, path)
+            self.usage.record(key, success=False)
             self.speaker.say(f"Launch failed for {key}: {launch_err}")
             return
 
@@ -297,30 +314,67 @@ class ActionExecutor:
             except Exception as e:
                 print(f"  [WARN] Priority set failed: {e}")
 
-    def _volume(self, action: dict):
-        level = max(0, min(100, int(action.get("level", 50))))
-
+    def _set_volume_raw(self, level_float: float):
+        """Set volume immediately (0.0–1.0). Internal helper."""
         if PYCAW_AVAILABLE:
             try:
-                devices   = AudioUtilities.GetSpeakers()
-                interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-                vol_ctrl  = cast(interface, POINTER(IAudioEndpointVolume))
-                vol_ctrl.SetMasterVolumeLevelScalar(level / 100.0, None)
-                print(f"  [VOLUME] Set to {level}%")
-                return
-            except Exception as e:
-                print(f"  [WARN] pycaw failed: {e}. Falling back to nircmd.")
-
+                devices  = AudioUtilities.GetSpeakers()
+                iface    = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+                vol_ctrl = cast(iface, POINTER(IAudioEndpointVolume))
+                vol_ctrl.SetMasterVolumeLevelScalar(level_float, None)
+                return True
+            except Exception:
+                pass
         nircmd = self.config.get("tools", {}).get("nircmd", "nircmd")
         result = subprocess.run(
-            [nircmd, "setsysvolume", str(int(level * 655.35))],
+            [nircmd, "setsysvolume", str(int(level_float * 65535))],
             capture_output=True
         )
-        if result.returncode == 0:
-            print(f"  [VOLUME] Set to {level}% via nircmd")
-        else:
-            print(f"  [WARN] Volume control unavailable. Install pycaw or nircmd.")
-            self.speaker.say("Volume control unavailable.")
+        return result.returncode == 0
+
+    def _get_volume_raw(self) -> float:
+        """Get current volume (0.0–1.0). Internal helper."""
+        if PYCAW_AVAILABLE:
+            try:
+                devices  = AudioUtilities.GetSpeakers()
+                iface    = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+                vol_ctrl = cast(iface, POINTER(IAudioEndpointVolume))
+                return vol_ctrl.GetMasterVolumeLevelScalar()
+            except Exception:
+                pass
+        return 0.5
+
+    def _volume(self, action: dict):
+        target    = max(0, min(100, int(action.get("level", 50))))
+        fade      = action.get("fade", True)
+        steps     = 20
+        duration  = 1.0  # seconds
+
+        if not fade:
+            ok = self._set_volume_raw(target / 100.0)
+            if ok:
+                print(f"  [VOLUME] Set to {target}%")
+            else:
+                self.speaker.say("Volume control unavailable.")
+            return
+
+        # Smooth fade
+        current = self._get_volume_raw() * 100
+        if abs(current - target) < 2:
+            return  # already there
+
+        def _fade():
+            step_size = (target - current) / steps
+            step_time = duration / steps
+            for i in range(steps):
+                new_level = current + step_size * (i + 1)
+                self._set_volume_raw(max(0, min(100, new_level)) / 100.0)
+                time.sleep(step_time)
+            self._set_volume_raw(target / 100.0)
+            print(f"  [VOLUME] Faded to {target}%")
+
+        import threading
+        threading.Thread(target=_fade, daemon=True).start()
 
     def _url(self, action: dict):
         url = action.get("url", "")
@@ -469,3 +523,26 @@ class ActionExecutor:
 
         print(f"  [FOOD] {msg}")
         self.speaker.say(msg)
+
+    def _window(self, action: dict):
+        """Window management — snap, focus, tile, etc."""
+        if not WINDOW_MANAGER_AVAILABLE:
+            self.speaker.say("Window management not available. Run: pip install pygetwindow pywin32")
+            return
+        msg = dispatch_window_action(action)
+        print(f"  [WINDOW] {msg}")
+        self.speaker.say(msg)
+
+    def _reminder(self, action: dict):
+        """Set a timed reminder via the notification system."""
+        time_str = action.get("time", "")
+        message  = action.get("message", "Reminder, Sir.")
+        repeat   = action.get("repeat", False)
+        if hasattr(self, "notifications") and self.notifications:
+            self.notifications.add_reminder(time_str, message, repeat)
+            self.speaker.say(
+                f"Reminder set for {time_str}, Sir." if time_str
+                else "Reminder noted, Sir."
+            )
+        else:
+            self.speaker.say("Reminder system not active, Sir.")
