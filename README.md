@@ -116,65 +116,24 @@ You can use a different path — just be consistent throughout.
 
 ---
 
-## STEP 4 — Allow PowerShell Scripts
+## STEP 4 — Run Automatic Setup
 
-Run this once in PowerShell:
-```powershell
-Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
-```
-Press `Y` to confirm. You only need to do this once.
+This does everything for you — installs dependencies, detects your apps, builds
+a personalised `config.json`, and creates a desktop shortcut:
 
----
-
-## STEP 5 — Install Dependencies
-
-Navigate to the project folder and install everything:
 ```powershell
 cd F:\Projects\ai
-pip install -r requirements.txt
-pip install mss pillow selenium webdriver-manager
-pip install piper-tts sounddevice soundfile numpy
-pip install openwakeword
-pip install pygetwindow pywin32
+python setup_nexus.py
 ```
 
-**If PyAudio fails:**
-```powershell
-pip install pipwin
-pipwin install pyaudio
-```
+That's it. The script will:
+- Install all Python packages automatically
+- Start Ollama and download the AI model
+- Scan your PC for installed apps and build `config.json` for **your** system
+- Set the PowerShell execution policy
+- Create a **Core Nexus** shortcut on your Desktop
 
-> What are all these? Think of them as plug-in accessories — one for the mic,
-> one for volume control, one for screenshots, one for the neural voice, etc.
-
----
-
-## STEP 6 — Update config.json
-
-Open `config.json` in Notepad. Find every place it says `lukes` and replace it
-with **your Windows username**.
-
-For example, if your username is `jake`:
-```
-C:\Users\lukes\AppData\...   →   C:\Users\jake\AppData\...
-```
-
-**For Steam games**, paths use a special format — no file path needed:
-```json
-"war thunder": {
-    "path": "steam://rungameid/236390"
-}
-```
-Find any game's Steam App ID at: `store.steampowered.com/app/[NUMBER]`
-
----
-
-## STEP 7 — Create a Desktop Shortcut (One-time)
-
-Double-click **`create_shortcut.bat`** — this creates a **Core Nexus** shortcut on your
-Desktop that uses the right Python version automatically.
-
-From then on, just double-click **Core Nexus** on your desktop to launch everything.
+> The config is built specifically for whoever runs this script — no manual path editing needed.
 
 ---
 

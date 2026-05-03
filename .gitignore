@@ -4,3 +4,4 @@ app_cache.json
 conversation_history.json
 launch_failures.json
 *.envpiper_models/
+piper_models/
