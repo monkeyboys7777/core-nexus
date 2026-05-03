@@ -6,7 +6,7 @@ import os, sys, time, subprocess, threading, webbrowser, math
 import tkinter as tk
 from tkinter import font as tkfont
 
-BASE_DIR      = r"F:\Projects\ai"
+BASE_DIR      = r"F:\Projects\core-nexus"
 PYTHON        = r"C:\Users\lukes\AppData\Local\Programs\Python\Python312\python.exe"
 VOICE_SCRIPT  = os.path.join(BASE_DIR, "core_nexus.py")
 SERVER_SCRIPT = os.path.join(BASE_DIR, "nexus_server.py")

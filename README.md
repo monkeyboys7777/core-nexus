@@ -41,7 +41,7 @@ It uses your GPU to think, just like it does for games.
 ## File Structure
 
 ```
-F:\Projects\ai\
+F:\Projects\core-nexus\
 ├── launcher.pyw            ← Double-click to start everything (HUD GUI)
 ├── create_shortcut.bat     ← Run once to create a desktop shortcut
 ├── core_nexus.py           ← Main voice loop and Ollama AI bridge
@@ -109,7 +109,7 @@ ollama list
 
 Place all project files into:
 ```
-F:\Projects\ai\
+F:\Projects\core-nexus\
 ```
 
 You can use a different path — just be consistent throughout.
@@ -122,7 +122,7 @@ This does everything for you — installs dependencies, detects your apps, build
 a personalised `config.json`, and creates a desktop shortcut:
 
 ```powershell
-cd F:\Projects\ai
+cd F:\Projects\core-nexus
 python setup_nexus.py
 ```
 
@@ -146,7 +146,7 @@ Double-click "Core Nexus" on your desktop
 
 **Option B — Direct launch:**
 ```powershell
-cd F:\Projects\ai
+cd F:\Projects\core-nexus
 & "C:\Users\lukes\AppData\Local\Programs\Python\Python312\pythonw.exe" launcher.pyw
 ```
 
@@ -294,7 +294,7 @@ To train a custom **"Nexus"** wake word:
 1. Go to https://openwakeword.com
 2. Train a model for the word "Nexus"
 3. Download the `.tflite` file
-4. Save it as `F:\Projects\ai\nexus_wakeword.tflite`
+4. Save it as `F:\Projects\core-nexus\nexus_wakeword.tflite`
 5. Nexus will pick it up automatically on next launch
 
 ---
@@ -305,7 +305,7 @@ To train a custom **"Nexus"** wake word:
 Make sure you're using the shortcut created by `create_shortcut.bat` — it points to
 the correct Python 3.12. If clicking the launcher directly, run it via PowerShell:
 ```powershell
-& "C:\Users\lukes\AppData\Local\Programs\Python\Python312\pythonw.exe" "F:\Projects\ai\launcher.pyw"
+& "C:\Users\lukes\AppData\Local\Programs\Python\Python312\pythonw.exe" "F:\Projects\core-nexus\launcher.pyw"
 ```
 
 **"Ollama is not running"**
