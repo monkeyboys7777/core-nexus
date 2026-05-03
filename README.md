@@ -13,14 +13,14 @@
 ## What is Core Nexus?
 
 Imagine having a butler who lives inside your computer — inspired by Jarvis from Iron Man.
-You say **"Hey Jarvis"** (or just **"Nexus"** in text mode), tell it what you want, and it does it.
+You say **"Nexus"** (or just **"Nexus"** in text mode), tell it what you want, and it does it.
 
-- *"Hey Jarvis... open Minecraft"* → Minecraft launches automatically
-- *"Hey Jarvis... set volume to 50"* → Volume changes to 50%
-- *"Hey Jarvis... order me a pizza from Dominos"* → Dominos opens ready to order
-- *"Hey Jarvis... what's on my screen?"* → AI reads and describes your screen
-- *"Hey Jarvis... snap Discord to the left"* → Window snaps to left half
-- *"Hey Jarvis... remind me at 6pm to eat"* → Sets a timed reminder
+- *"Nexus, open Minecraft"* → Minecraft launches automatically
+- *"Nexus, set volume to 50"* → Volume changes to 50%
+- *"Nexus, order me a pizza from Dominos"* → Dominos opens ready to order
+- *"Nexus, what's on my screen?"* → AI reads and describes your screen
+- *"Nexus, snap Discord to the left"* → Window snaps to left half
+- *"Nexus, remind me at 6pm to eat"* → Sets a timed reminder
 
 The AI brain runs **100% on your own computer** — no cloud, no subscription, no API key.
 It uses your GPU to think, just like it does for games.
@@ -226,27 +226,27 @@ Click **▶ LAUNCH NEXUS** to start both the voice engine and web dashboard toge
 
 ## Usage — Voice Commands
 
-Say **"Hey Jarvis"** to activate, then give your command:
+Say **"Nexus"** followed by your command:
 
 | Say This | What Happens |
 |---|---|
-| `Hey Jarvis... open Discord` | Launches Discord |
-| `Hey Jarvis... open Minecraft` | Launches Minecraft |
-| `Hey Jarvis... set volume to 30` | Sets volume to 30% |
-| `Hey Jarvis... what's on my screen` | AI describes your screen |
-| `Hey Jarvis... thermals` | Reports CPU load and GPU temperature |
-| `Hey Jarvis... order pizza from Dominos` | Opens Dominos ordering page |
-| `Hey Jarvis... book a table at Swiss Chalet` | Opens OpenTable |
-| `Hey Jarvis... snap Discord to the left` | Snaps Discord window left |
-| `Hey Jarvis... tile Discord and Chrome` | Tiles two windows side by side |
-| `Hey Jarvis... open YouTube` | Opens YouTube in browser |
-| `Hey Jarvis... search Trackmania world records` | Google search |
-| `Hey Jarvis... kill Discord` | Asks confirmation then closes Discord |
-| `Hey Jarvis... sleep` | Puts PC to sleep |
-| `Hey Jarvis... restart` | Asks confirmation then restarts in 5s |
-| `Hey Jarvis... game mode` | Closes Chrome, opens Discord, sets volume 60 |
-| `Hey Jarvis... study mode` | Closes games and Discord, opens school portal |
-| `Hey Jarvis... remind me at 6pm to eat` | Sets a 6pm reminder |
+| `Nexus, open Discord` | Launches Discord |
+| `Nexus, open Minecraft` | Launches Minecraft |
+| `Nexus, set volume to 30` | Sets volume to 30% |
+| `Nexus, what's on my screen` | AI describes your screen |
+| `Nexus, thermals` | Reports CPU load and GPU temperature |
+| `Nexus, order pizza from Dominos` | Opens Dominos ordering page |
+| `Nexus, book a table at Swiss Chalet` | Opens OpenTable |
+| `Nexus, snap Discord to the left` | Snaps Discord window left |
+| `Nexus, tile Discord and Chrome` | Tiles two windows side by side |
+| `Nexus, open YouTube` | Opens YouTube in browser |
+| `Nexus, search Trackmania world records` | Google search |
+| `Nexus, kill Discord` | Asks confirmation then closes Discord |
+| `Nexus, sleep` | Puts PC to sleep |
+| `Nexus, restart` | Asks confirmation then restarts in 5s |
+| `Nexus, game mode` | Closes Chrome, opens Discord, sets volume 60 |
+| `Nexus, study mode` | Closes games and Discord, opens school portal |
+| `Nexus, remind me at 6pm to eat` | Sets a 6pm reminder |
 
 > **Speech errors are handled automatically.** Saying "rinecraft" opens Minecraft.
 > Saying "geo dash" opens Geometry Dash. "fort night" opens Fortnite.
@@ -322,7 +322,7 @@ Then say *"Hey Jarvis, stream mode"* and all four things happen at once.
 
 ## Custom Wake Word
 
-By default Nexus responds to **"Hey Jarvis"** — which fits the Iron Man theme.
+By default Nexus responds to **"Nexus"** — which fits the Iron Man theme.
 
 To change it, update `config.json`:
 ```json
